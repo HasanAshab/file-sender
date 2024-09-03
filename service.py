@@ -7,22 +7,24 @@ def upload_files_and_clear():
         for file_name in os.listdir(target_dir):
             file_path = os.path.join(target_dir, file_name)
 
-            if os.path.isfile(file_path):
+            if os.path.isfile(file_path) and not file_name.startswith('.'):
                 try:
                     with open(file_path, 'rb') as f:
                         response = requests.post('https://file.io', files={'file': f})
                         response.raise_for_status()
-                    
+
                     file_url = response.json().get('link')
-                    requests.post('https://filestore.pythonanywhere.com/file-urls', data={"link":link})
+                    response = requests.post('https://filestore.pythonanywhere.com/file-urls/', data={"url":file_url})
                     response.raise_for_status()
                     
-                    os.remove(file_path)
+                    #os.remove(file_path)
 
                 except requests.exceptions.RequestException as e:
+                    print(e)
                     pass
 
     except Exception as e:
+        print(e)
         pass
 
 if __name__ == "__main__":
