@@ -29,9 +29,8 @@ class FileSenderApp(App):
         
         alarm_manager = cast(AlarmManager, context.getSystemService(context.ALARM_SERVICE))
 
-        interval = 6 * 60 * 60 * 1000  # 6 hours in milliseconds
+        interval = 6 * 60 * 60 * 1000
         alarm_manager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + interval, interval, pending_intent)
-        print("Service scheduled to run every 6 hours.")
 
 if __name__ == '__main__':
     BackgroundApp().run()

