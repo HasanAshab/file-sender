@@ -1,56 +1,63 @@
 import os
-import time
 import requests
+import io
 import zipfile
-import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from utils import load_config
 
 
+def is_target_file(target_folder, file_name):
+    return (
+        os.path.isfile(os.path.join(target_folder, file_name)) 
+        and not file_name.startswith('.')
+    )
+
+def get_target_files(folder):
+    return [
+        os.path.join(folder, file_name)
+        for file_name in os.listdir(folder)
+        if is_target_file(folder, file_name)
+    ]
+
 def create_zip(files):
-    temp_dir = tempfile.gettempdir()
-    zip_path = os.path.join(temp_dir, f"file-sender-{time.time()}.zip")
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for file_path in files:
             zipf.write(file_path, os.path.basename(file_path))
-    return zip_path
+    zip_buffer.seek(0) 
+    return zip_buffer
 
 
-def upload_zip(zip_path, upload_url, link_storage_url):
-    with open(zip_path, "rb") as f:
-        response = requests.post(upload_url, files={"file": f})
+def upload_zip(zip_buffer, upload_url, link_storage_url):
+    with requests.Session() as session:
+        response = session.post(upload_url, files={"file": zip_buffer})
         response.raise_for_status()
 
-    file_url = response.json().get("link")
-    response = requests.post(link_storage_url, data={"url": file_url})
-    response.raise_for_status()
+        file_url = response.json().get("link")
+        response = session.post(link_storage_url, data={"url": file_url})
+        response.raise_for_status()
 
 
 def delete_files(files):
-    for file_path in files:
-        os.remove(file_path)
+    with ThreadPoolExecutor() as executor:
+        executor.map(os.remove, files)
 
 
 def upload_files_and_clear():
     config = load_config()
-    target_folder = config["target_folder"]
-    target_files = [ 
-        os.path.join(target_folder, file_name)
-        for file_name in os.listdir(target_folder)
-        if not file_name.startswith('.')
-    ]
-
-    zip_path = create_zip(target_files)
-    if zip_path:
-        upload_zip(
-            zip_path,
-            config["upload_url"],
-            config["link_storage_url"]
-        )
-        os.remove(zip_path)
-        delete_files(target_files)
+    target_files = get_target_files(config["target_folder"])
+    if len(target_files) == 0: return
+    zip_buffer = create_zip(target_files)
+    upload_zip(
+        zip_buffer,
+        config["upload_url"],
+        config["link_storage_url"]
+    )
+    delete_files(target_files)
 
 
 if __name__ == "__main__":
+    import time
     t = time.time()
     upload_files_and_clear()
     print(time.time() - t)
