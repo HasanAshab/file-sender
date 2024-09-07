@@ -6,7 +6,7 @@ DEFAULT_CONFIG = {
     "interval": 6 * 60 * 60 * 1000,
     "target_folder": "/storage/emulated/0/Documents/CubeCallRecorder/All",
     "upload_url": "https://file.io",
-    "link_storage_url": "https://filestore.pythonanywhere.com/file-urls/"
+    "link_storage_url": "https://file-store-ro7u.onrender.com/file-urls"
 }
 
 

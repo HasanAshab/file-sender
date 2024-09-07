@@ -32,12 +32,11 @@ def upload_zip(zip_buffer, upload_url, link_storage_url):
     with requests.Session() as session:
         response = session.post(upload_url, files={"file": zip_buffer})
         response.raise_for_status()
-
+        
         file_url = response.json().get("link")
-        response = session.post(link_storage_url, data={"url": file_url})
+        response = session.post(link_storage_url, json={"url": file_url})
         response.raise_for_status()
-
-
+    
 def delete_files(files):
     with ThreadPoolExecutor() as executor:
         executor.map(os.remove, files)
