@@ -2,8 +2,8 @@ import os
 import requests
 import io
 import zipfile
-import settings
 from concurrent.futures import ThreadPoolExecutor
+from . import settings
 
 
 def is_target_file(file_name):
