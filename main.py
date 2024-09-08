@@ -2,9 +2,7 @@ from kivy.app import App
 from kivy.uix.label import Label
 from jnius import autoclass, cast
 from android import mActivity
-import os
-import requests
-import settings
+from . import settings
 
 
 Intent = autoclass('android.content.Intent')
@@ -31,4 +29,4 @@ class FileSenderApp(App):
 
 
 if __name__ == '__main__':
-    BackgroundApp().run()
+    FileSenderApp().run()
