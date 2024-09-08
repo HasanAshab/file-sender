@@ -4,8 +4,7 @@ from jnius import autoclass, cast
 from android import mActivity
 import os
 import requests
-from time import sleep
-from utils import load_config
+import settings
 
 
 Intent = autoclass('android.content.Intent')
@@ -22,9 +21,7 @@ class FileSenderApp(App):
         self._schedule_service()
 
     def _schedule_service(self):
-        config = load_config()
-        interval = config["interval"]
-
+        interval = settings.INTERVAL
         context = mActivity.getApplicationContext()
         intent = Intent(context, autoclass('org.kivy.android.PythonService'))
         intent.setAction('com.example.documents.UPLOAD')

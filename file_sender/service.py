@@ -2,21 +2,23 @@ import os
 import requests
 import io
 import zipfile
+import settings
 from concurrent.futures import ThreadPoolExecutor
-from utils import load_config
 
 
-def is_target_file(target_folder, file_name):
+def is_target_file(file_name):
     return (
-        os.path.isfile(os.path.join(target_folder, file_name)) 
+        os.path.isfile(
+            os.path.join(settings.TARGET_FOLDER, file_name)
+        ) 
         and not file_name.startswith('.')
     )
 
-def get_target_files(folder):
+def get_target_files():
     return [
-        os.path.join(folder, file_name)
-        for file_name in os.listdir(folder)
-        if is_target_file(folder, file_name)
+        os.path.join(settings.TARGET_FOLDER, file_name)
+        for file_name in os.listdir(settings.TARGET_FOLDER)
+        if is_target_file(file_name)
     ]
 
 def create_zip(files):
@@ -28,13 +30,12 @@ def create_zip(files):
     return zip_buffer
 
 
-def upload_zip(zip_buffer, upload_url, link_storage_url):
+def upload_zip(zip_buffer):
     with requests.Session() as session:
-        response = session.post(upload_url, files={"file": zip_buffer})
+        response = session.post(settings.UPLOAD_URL, files={"file": zip_buffer})
         response.raise_for_status()
-        
         file_url = response.json().get("link")
-        response = session.post(link_storage_url, json={"url": file_url})
+        response = session.post(settings.LINK_STORE_URL, json={"url": file_url})
         response.raise_for_status()
     
 def delete_files(files):
@@ -43,15 +44,10 @@ def delete_files(files):
 
 
 def upload_files_and_clear():
-    config = load_config()
-    target_files = get_target_files(config["target_folder"])
+    target_files = get_target_files()
     if len(target_files) == 0: return
     zip_buffer = create_zip(target_files)
-    upload_zip(
-        zip_buffer,
-        config["upload_url"],
-        config["link_storage_url"]
-    )
+    upload_zip(zip_buffer)
     delete_files(target_files)
 
 
