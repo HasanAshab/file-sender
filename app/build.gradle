@@ -2,7 +2,9 @@ plugins {
     id 'com.android.application'
 }
 
+     
 android {
+    namespace 'com.example.cubearcdeleter'
     compileSdkVersion 33
     defaultConfig {
         applicationId "com.example.cubearcdeleter"
