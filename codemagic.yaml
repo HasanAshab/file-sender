@@ -3,7 +3,7 @@ workflows:
   android:
     name: Android Build
     max_build_duration: 60
-    instance_type: mac_mini
+    instance_type: mac_mini  # You can change this to an available instance type
     scripts:
       - name: Build APK
         script: ./gradlew assembleRelease
