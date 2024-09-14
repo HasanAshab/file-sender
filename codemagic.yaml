@@ -5,6 +5,6 @@ workflows:
     max_build_duration: 60
     scripts:
       - name: Build APK
-        script: ./gradlew assembleRelease
+        script: ./gradlew assembleRelease --warning-mode=all
     artifacts:
       - app/build/outputs/apk/release/*.apk
