@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.cubearcdeleter">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
@@ -8,7 +7,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat">
         <service android:name=".DeleteService" />
-        <receiver android:name=".BootReceiver">
+        <receiver android:name=".BootReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
