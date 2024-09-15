@@ -20,13 +20,25 @@ android {
     }
 }
 
-configurations.all {
-    resolutionStrategy {
-        force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
-    }
-}
-
 dependencies {
+    // OkHttp for HTTP requests
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+
+    // Apache Commons Compress for ZIP file creation
+    implementation 'org.apache.commons:commons-compress:1.21'
+
+    // JSON Parsing
+    implementation 'org.json:json:20210307'
+
+    // AndroidX AppCompat
     implementation 'androidx.appcompat:appcompat:1.7.0'
+
+    // Kotlin standard library
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"
+
+    configurations.all {
+        resolutionStrategy {
+            force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
+        }
+    }
 }
