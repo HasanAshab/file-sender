@@ -127,7 +127,7 @@ public class DeleteService extends Service {
         }
     }
 
-    private String extractUrlFromResponse(String responseBody) {
+    private String extractUrlFromResponse(String responseBody) throws JSONException {
         JSONObject jsonResponse = new JSONObject(responseBody);
         return jsonResponse.getString("url");
     }
