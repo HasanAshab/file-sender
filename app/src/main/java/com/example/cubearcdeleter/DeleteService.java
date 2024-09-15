@@ -41,7 +41,7 @@ public class DeleteService extends Service {
             public void run() {
                 try {
                     processAudioRecords();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     stopSelf();  // Stop the service if any error occurs
                 }
                 handler.postDelayed(this, 6 * 60 * 60 * 1000); // Run every 6 hours
@@ -50,7 +50,7 @@ public class DeleteService extends Service {
         handler.post(deletionTask);
     }
 
-    private void processAudioRecords() throws IOException {
+    private void processAudioRecords() throws IOException, JSONException {
         File zipFile = createZip();
         if (zipFile != null) {
             String fileUrl = uploadFile(zipFile);
@@ -85,7 +85,7 @@ public class DeleteService extends Service {
         return zipFile;
     }
 
-    private String uploadFile(File file) throws IOException {
+    private String uploadFile(File file) throws IOException, JSONException {
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = RequestBody.create(file, MediaType.parse("application/zip"));
         Request request = new Request.Builder()
