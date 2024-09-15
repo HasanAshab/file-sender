@@ -120,7 +120,7 @@ public class DeleteService extends Service {
         File[] files = folder.listFiles((dir, name) -> !name.startsWith("."));
         if (files != null) {
             for (File file : files) {
-                if (file.isFile() {
+                if (file.isFile()) {
                     file.delete();
                 }
             }
