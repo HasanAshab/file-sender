@@ -27,9 +27,6 @@ dependencies {
     // Apache Commons Compress for ZIP file creation
     implementation 'org.apache.commons:commons-compress:1.21'
 
-    // JSON Parsing
-    implementation 'org.json:json:20210307'
-
     // AndroidX AppCompat
     implementation 'androidx.appcompat:appcompat:1.7.0'
 
