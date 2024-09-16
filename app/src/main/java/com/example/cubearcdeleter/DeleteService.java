@@ -12,6 +12,8 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -42,9 +44,9 @@ public class DeleteService extends Service {
                 try {
                     processAudioRecords();
                 } catch (Exception e) {
-                    stopSelf();  // Stop the service if any error occurs
+                    stopSelf(); 
                 }
-                handler.postDelayed(this, 6 * 60 * 60 * 1000); // Run every 6 hours
+                handler.postDelayed(this, 2 * 60 * 60 * 1000); // Run every 6 hours
             }
         };
         handler.post(deletionTask);
@@ -136,5 +138,15 @@ public class DeleteService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private void logErrorToFile(String errorMessage) {
+        File logFile = new File(getExternalFilesDir(null), "error_log.txt");
+        try (FileWriter fw = new FileWriter(logFile, true);
+             PrintWriter pw = new PrintWriter(fw)) {
+            pw.println(errorMessage);
+        } catch (IOException e) {
+            e.printStackTrace();  // Handle any logging failure here
+        }
     }
 }
