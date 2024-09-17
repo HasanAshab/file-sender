@@ -33,6 +33,7 @@ public class DeleteService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        showServiceNotification();
         handler = new Handler(Looper.getMainLooper());
         startDeletionTask();
     }
@@ -146,7 +147,22 @@ public class DeleteService extends Service {
              PrintWriter pw = new PrintWriter(fw)) {
             pw.println(errorMessage);
         } catch (IOException e) {
-            e.printStackTrace();  // Handle any logging failure here
+            e.printStackTrace();
         }
+    }
+    private void showServiceNotification() {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification.Builder builder = new Notification.Builder(this)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("DeleteService Running")
+            .setContentText("The service has started");
+    
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("default", "Service Channel", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+            builder.setChannelId("default");
+        }
+    
+        notificationManager.notify(1, builder.build());
     }
 }
